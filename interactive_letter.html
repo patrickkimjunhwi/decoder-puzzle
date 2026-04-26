@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Roth &amp; Co. — The Letter</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Playfair+Display:ital,wght@1,500&display=swap');
+
+  /* Ending overlay */
+  .ending-overlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(20,10,5,0.92), rgba(0,0,0,0.99));
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0;
+    overflow: visible;
+    cursor: pointer;
+  }
+  .ending-overlay.show {
+    display: flex;
+    animation: overlayFadeIn 0.8s ease-out;
+  }
+  @keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .ending-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+  .ending-character {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 20px 20px 0;
+    overflow: visible;
+    animation: charFlyInEnd 1.1s cubic-bezier(0.25, 1.4, 0.5, 1) 0.2s backwards;
+  }
+  @keyframes charFlyInEnd {
+    from { opacity: 0; transform: translateY(40px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .ending-img {
+    height: 45vh;
+    max-height: 480px;
+    width: auto;
+    display: block;
+    margin: 0 auto 8px;
+    filter: drop-shadow(0 18px 40px rgba(0,0,0,0.85)) drop-shadow(0 0 30px rgba(201,162,74,0.15));
+    animation: floatIdleEnd 4s ease-in-out infinite;
+  }
+  @keyframes floatIdleEnd {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .ending-name {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 1.7rem;
+    font-weight: 900;
+    color: #c9a24a;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+    margin-bottom: 2px;
+  }
+  .ending-role {
+    font-size: 0.78rem;
+    color: #a89060;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+  .ending-dialog {
+    width: 100%;
+    min-height: 220px;
+    background: linear-gradient(180deg, rgba(217,195,154,0.98), rgba(201,178,137,0.98));
+    padding: 28px 60px 32px;
+    border-top: 3px solid #c9a24a;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.7), inset 0 0 50px rgba(120,80,30,0.12);
+    position: relative;
+    animation: dialogFlyInEnd 0.7s cubic-bezier(0.25,1.4,0.5,1) 0.7s backwards;
+  }
+  @keyframes dialogFlyInEnd {
+    from { opacity: 0; transform: translateY(60px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .ending-dialog::before {
+    content: "";
+    position: absolute;
+    top: -16px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-bottom: 16px solid #c9a24a;
+  }
+  .ending-dialog::after {
+    content: "";
+    position: absolute;
+    top: -13px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 14px solid #d9c39a;
+  }
+  .ending-dialog-inner { max-width: 900px; margin: 0 auto; }
+  .ending-dialog-speaker {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 0.95rem;
+    color: #8b1a1a;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 14px;
+    border-bottom: 1px dashed #8b7355;
+    padding-bottom: 8px;
+  }
+  .ending-dialog-text {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.35rem;
+    line-height: 1.7;
+    color: #2b1d10;
+    min-height: 95px;
+    font-style: italic;
+  }
+  .ending-next-hint {
+    text-align: right;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    color: #8b7355;
+    margin-top: 16px;
+    text-transform: uppercase;
+    animation: blinkHintEnd 1.4s ease-in-out infinite;
+    font-weight: bold;
+  }
+  @keyframes blinkHintEnd {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+  .ending-btn-wrap { margin-top: 14px; text-align: center; }
+  .ending-btn {
+    background: linear-gradient(180deg, #4a2a18, #6b3a22);
+    color: #ecd9af;
+    border: 1px solid #1a0a04;
+    padding: 14px 30px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    border-radius: 2px;
+    cursor: pointer;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-family: Georgia, serif;
+    box-shadow: 0 3px 0 #1a0a04, 0 5px 12px rgba(0,0,0,0.4);
+    transition: transform 0.05s, box-shadow 0.05s;
+  }
+  .ending-btn:hover { background: linear-gradient(180deg, #5a3522, #3a1f12); }
+  .ending-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #1a0a04; }
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: "Apple SD Gothic Neo", Georgia, serif;
+    background: #ecd9af;
+    min-height: 100vh;
+  }
+
+  .page-shadow {
+    width: 100%;
+  }
+
+  .page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 80px clamp(40px, 8vw, 140px) 90px;
+    background: linear-gradient(180deg, #ecd9af 0%, #e6d2a4 50%, #ddc695 100%);
+    position: relative;
+    color: #2b1d10;
+  }
+  .page::before {
+    /* fine speckled paper grain */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='4' seed='3'/><feColorMatrix values='0 0 0 0 0.3  0 0 0 0 0.18  0 0 0 0 0.06  0 0 0 0.55 0'/></filter><rect width='400' height='400' filter='url(%23n)'/></svg>");
+    opacity: 0.45;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+
+  .stamp {
+    position: absolute;
+    top: 45px;
+    right: 55px;
+    color: #6b1414;
+    border: 2px double #6b1414;
+    padding: 6px 14px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    font-size: 0.72rem;
+    transform: rotate(9deg);
+    opacity: 0.55;
+    text-transform: uppercase;
+    font-family: "Special Elite", "Courier New", monospace;
+    z-index: 2;
+  }
+
+  /* hidden bonus codeword */
+  .watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-22deg);
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 7rem;
+    letter-spacing: 16px;
+    font-weight: 500;
+    font-style: italic;
+    color: rgba(40, 20, 5, 0.06);
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .greeting {
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: 1.15rem;
+    margin: 0 0 28px;
+    letter-spacing: 2px;
+    color: #000000;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cipher-block {
+    margin: 28px 0;
+    page-break-inside: avoid;
+    position: relative;
+    z-index: 1;
+    border: 2px dashed transparent;
+    padding: 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .cipher-block.unlocked {
+    background: rgba(45, 90, 61, 0.1);
+    border-color: #2d5a3d;
+  }
+
+  .cipher-block.locked:hover {
+    background: rgba(201, 162, 74, 0.15);
+    border-color: #c9a24a;
+  }
+
+  .cipher-text {
+    font-family: "Special Elite", "Courier New", monospace;
+    font-weight: normal;
+    font-size: 1rem;
+    word-break: break-word;
+    letter-spacing: 1px;
+    line-height: 1.85;
+    color: #000000;
+    min-height: 60px;
+    position: relative;
+  }
+  .cipher-text.dense {
+    font-size: 0.92rem;
+    letter-spacing: 0.5px;
+    line-height: 1.75;
+  }
+
+  .cipher-text.locked {
+    color: #000000;
+    font-family: "Courier New", monospace;
+    font-size: 0.9rem;
+  }
+
+  .cipher-text.unlocked {
+    color: #000000;
+    font-weight: 500;
+    animation: fadeInText 1.2s ease-in-out;
+  }
+
+  @keyframes fadeInText {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .decode-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px dashed #c9a24a;
+    border-radius: 6px;
+    background: rgba(217, 195, 154, 0.3);
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: 0.9rem;
+    color: #2b1d10;
+    margin-top: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .decode-input:focus {
+    outline: none;
+    border-color: #8b1a1a;
+    background: rgba(217, 195, 154, 0.5);
+    box-shadow: 0 0 8px rgba(139, 26, 26, 0.3);
+  }
+
+  .decode-input::placeholder {
+    color: #8b6f3f;
+    font-style: italic;
+  }
+
+  .block-number {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: 24px;
+    height: 24px;
+    background: #8b1a1a;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: "Special Elite", monospace;
+  }
+
+  .block-number.unlocked {
+    background: #2d5a3d;
+  }
+
+  .divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(40, 20, 5, 0.45) 8%, rgba(40, 20, 5, 0.45) 92%, transparent);
+    margin: 36px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .closing {
+    margin-top: 50px;
+    text-align: right;
+    line-height: 1.7;
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: 1.05rem;
+    letter-spacing: 1.5px;
+    position: relative;
+    z-index: 1;
+    color: #000000;
+  }
+  .signature {
+    font-family: "Special Elite", "Courier New", monospace;
+    font-size: 1.15rem;
+    color: #000000;
+    margin-top: 6px;
+    letter-spacing: 2px;
+  }
+
+  /* Progress indicator */
+  .progress {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: "Special Elite", monospace;
+    font-size: 0.9rem;
+    z-index: 100;
+  }
+
+  /* Error notification */
+  .error-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(139, 26, 26, 0.95);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-family: "Special Elite", monospace;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .error-toast.show {
+    opacity: 1;
+  }
+
+  /* Complete effect */
+  .page.complete {
+    animation: completeGlow 2s ease-in-out;
+  }
+
+  @keyframes completeGlow {
+    0%, 100% {
+      box-shadow: none;
+    }
+    50% {
+      box-shadow: 0 0 50px rgba(201, 162, 74, 0.8), inset 0 0 50px rgba(201, 162, 74, 0.3);
+    }
+  }
+
+  /* Completion message */
+  .completion-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(45, 90, 61, 0.95);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 10px;
+    text-align: center;
+    font-family: "Playfair Display", serif;
+    font-size: 1.2rem;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .completion-message.show {
+    opacity: 1;
+  }
+
+  /* Instructions */
+  .instructions {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(139, 26, 26, 0.9);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    max-width: 300px;
+    line-height: 1.4;
+  }
+
+  @media print {
+    body { background: white; }
+    .page-shadow { width: 210mm; margin: 0; }
+    .page { width: 210mm; min-height: 297mm; padding: 80px 70px 90px; }
+    .progress, .instructions, .paste-area, .modal { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress">
+  <span id="progressText">0/8 blocks unlocked</span>
+</div>
+
+<button onclick="unlockedBlocks=7;showCompletion()" style="position:fixed;bottom:60px;right:20px;z-index:9998;background:#8b1a1a;color:white;border:none;padding:8px 14px;font-size:0.75rem;cursor:pointer;border-radius:4px;font-family:monospace;">TEST ENDING</button>
+
+<div class="instructions">
+  💡 Lös varje chiffer i dekodern, skriv sedan in svaret i rätt block och tryck Enter.
+</div>
+
+<div class="page-shadow">
+<div class="page">
+  <div class="stamp">Confidential</div>
+  <div class="watermark" id="pageWatermark">Mysterium</div>
+
+  <div class="cipher-block locked" data-block="1">
+    <div class="block-number">1</div>
+    <p class="greeting">
+      <span class="cipher-text locked">KHM BOVNOLQJ,</span>
+    </p>
+    <input type="text" class="decode-input" placeholder="Type or paste the decoded text and press Enter..." />
+  </div>
+
+  <div class="cipher-block locked" data-block="2">
+    <div class="block-number">2</div>
+    <div class="cipher-text locked">L ZDQWHG WR GR VRPHWKLQJ IXQ IRU ARX, VR L FDPH XS ZLWK WKLV LGHD. L ZRNH XS WKLV PRUQLQJ DQG VDZ WKLV WKLQJ FDOOHG SDJHU FRGH. EDFN LQ WKH '90V, ZKHQ SHRSOH GLGQ'W KDYH VPDUWSKRQHV DQG RQOA KDG SDJHUV, WKHA FRXOG RQOA VHQG PHVVDJHV ZLWK QXPEHUV, VR SHRSOH KDG WR GHFRGH WKHP.</div>
+    <input type="text" class="decode-input" placeholder="Type or paste the decoded text and press Enter..." />
+  </div>
+
+  <hr class="divider">
+
+  <div class="cipher-block locked" data-block="3">
+    <div class="block-number">3</div>
+    <div class="cipher-text locked dense">!nuf evah uoy epoh I .uoy rof siht detaerc I ,oS .citnamor etiuq saw ti thguoht I dna ,yaw siht segassem evol tnes yeht semitemoS</div>
+    <input type="text" class="decode-input" placeholder="Type or paste the decoded text and press Enter..." />
+  </div>
+
+  <hr class="divider">
+
+  <div class="cipher-block locked" data-block="4">
+    <div class="block-number">4</div>
+    <div class="cipher-text locked">𓆓𓂧𓊪𓊪𓂧𓈬 / 𓉐𓊪𓀀𓈬𓊪𓉐:</div>
+    <input type="text" class="decode-input" placeholder="Type or paste the decoded text and press Enter..." />
+  </div>
+
+  <hr class="divider">
+
+  <div class="cipher-block locked" data-block="5">
+    <div class="block-number">5</div>
+    <div class="cipher-text locked">.. - ... / -.-. .-. .- --.. -.-- / - .... .- - / .. - ... / -... . . -. / --... / -- --- -. - .... ... / .- .-.. .-. . .- -.. -.--</div>
+    <input type="text" class="decode-input" placeholder="Type or paste the decoded text and press Enter..." />
+  </div>
+
+  <hr class="divider">
+
+  <div class="cipher-block locked" data-block="6">
+    <div class="block-number">6</div>
+    <div class="cipher-text locked dense">9-13 / 19-15 / 8-1-16-16-25 / 9 / 8-1-4 / 13-25 / 6-9-18-19-20-5-22-5-18 / 20-18-9-16 / 20-15 / 5-21-18-15-16-5 / 23-9-20-8 / 25-15-21 / 9-20 / 23-1-19 / 19-21-3-8 / 1 / 13-5-13-15-18-1-2-12-5 / 13-15-13-5-14-20 / 1-14-4 / 25-15-21 / 1-18-5 / 3-15-13-9-14-7 / 2-1-3-11 / 20-15 / 13-5-12-2-15-21-18-14-5 / 9-14 / 10-21-12-25 / 9-20 / 6-5-5-12-19 / 19-15 / 21-14-18-5-1-12 / 20-8-1-20 / 20-8-9-19 / 9-19 / 8-1-16-16-5-14-9-14-7</div>
+    <input type="text" class="decode-input" placeholder="Type or paste the decoded text and press Enter..." />
+  </div>
+
+  <hr class="divider">
+
+  <div class="cipher-block locked" data-block="7">
+    <div class="block-number">7</div>
+    <div class="cipher-text locked">LTXO TÅ BKAWAF CVÖXEOÅMBIORE LCN NWÄR. YZJ DZÖYJ HLKO YMFKR TBKRQÅKD BZSA TNYT GWKÖ, IÅJ NPÅASMB ÖOCAN T. Q NVPÖWMTIDK OCG ATUR ZORWASMB GNO Å KÅXBKCTSAP DÄÅ. LPI'Ö MÖVRD XDÄP URSOÖÅOA IÅJ SBSF SIÖVY LCN SMNRTSN! S XQCY YZJ. VZAR BOC SXO ÅRK YZJ ÖZWÅ.</div>
+    <input type="text" class="decode-input" placeholder="Type or paste the decoded text and press Enter..." />
+  </div>
+
+  <hr class="divider">
+
+  <div class="cipher-block locked" data-block="8">
+    <div class="block-number">8</div>
+    <div class="closing" style="text-align: left;">
+      <div style="margin-bottom: 16px;">
+        <span class="cipher-text locked" data-subblock="8a" style="display: block; margin-bottom: 8px;">ÄRXU NDPMD,</span>
+        <input type="text" class="decode-input" data-subblock="8a" placeholder="Type the first part..." style="font-size: 0.85rem;" />
+      </div>
+      <div>
+        <span class="cipher-text locked signature" data-subblock="8b" style="display: block; margin-bottom: 8px;">— MXQKZL</span>
+        <input type="text" class="decode-input" data-subblock="8b" placeholder="Type the second part..." style="font-size: 0.85rem;" />
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="error-toast" id="errorToast"></div>
+
+<div class="completion-message" id="completionMessage"></div>
+
+<!-- ENDING OVERLAY — closing scene with all three characters -->
+<div id="endingOverlay" class="ending-overlay">
+  <div class="ending-character">
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <img src="detective_nobg.png" alt="Magnus Holm" class="ending-img" />
+      <div class="ending-name">Magnus Holm</div>
+      <div class="ending-role">Roth &amp; Co. · Malmö 1894</div>
+    </div>
+  </div>
+  <div class="ending-dialog">
+    <div class="ending-dialog-inner">
+      <div class="ending-dialog-speaker">Magnus Holm</div>
+      <div class="ending-dialog-text" id="endingText"></div>
+      <div class="ending-next-hint" id="endingHint">▼ Press any key</div>
+      <div class="ending-btn-wrap" id="endingBtnWrap" style="display:none;">
+        <button class="ending-btn" id="endingClose">Read the letter ✉</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Answer key for validation
+const ANSWERS = {
+  1: "HEJ ÄLSKLING,",
+  2: "I WANTED TO DO SOMETHING FUN FOR YOU, SO I CAME UP WITH THIS IDEA. I WOKE UP THIS MORNING AND SAW THIS THING CALLED PAGER CODE. BACK IN THE '90S, WHEN PEOPLE DIDN'T HAVE SMARTPHONES AND ONLY HAD PAGERS, THEY COULD ONLY SEND MESSAGES WITH NUMBERS, SO PEOPLE HAD TO DECODE THEM.",
+  3: "SOMETIMES THEY SENT LOVE MESSAGES THIS WAY, AND I THOUGHT IT WAS QUITE ROMANTIC. SO, I CREATED THIS FOR YOU. I HOPE YOU HAVE FUN!",
+  4: "LETTER STARTS:",
+  5: "IT'S CRAZY THAT IT'S BEEN 7 MONTHS ALREADY.",
+  6: "I'M SO HAPPY I HAD MY FIRST-EVER TRIP TO EUROPE WITH YOU. IT WAS SUCH A MEMORABLE MOMENT. AND YOU ARE COMING BACK TO MELBOURNE IN JULY! IT FEELS SO UNREAL THAT THIS IS HAPPENING.",
+  7: "LIFE IS REALLY UNPREDICTABLE AND COOL. YOU WOULD HAVE NEVER IMAGINED THIS LAST YEAR, AND NEITHER WOULD I. I APPRECIATE OUR TIME TOGETHER AND I APPRECIATE YOU. LET'S BUILD MORE MEMORIES AND STAY HAPPY AND HEALTHY! I MISS YOU. LOVE YOU AND SEE YOU SOON.",
+  "8a": "YOUR KAMJA,",
+  "8b": "JUNHWI"
+};
+
+let block8Progress = { "8a": false, "8b": false };
+
+let unlockedBlocks = 0;
+
+// Add input listeners
+document.addEventListener('DOMContentLoaded', function() {
+document.querySelectorAll('.decode-input').forEach(input => {
+    input.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const blockNum = this.closest('.cipher-block').dataset.block;
+        const subBlock = this.dataset.subblock;
+
+        if (subBlock) {
+          validateSubBlock(subBlock, this.value.trim());
+        } else {
+          validateAndUnlock(parseInt(blockNum), this.value.trim());
+        }
+      }
+    });
+  });
+});
+
+function validateAndUnlock(blockNum, inputText) {
+  const expectedText = ANSWERS[blockNum];
+  const normalizedInput = inputText.toUpperCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+  const normalizedExpected = expectedText.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+
+  if (normalizedInput === normalizedExpected) {
+    unlockBlock(blockNum, expectedText);
+  } else {
+    // Simple error feedback without hints
+    showError("Not quite right. Try again!");
+  }
+}
+
+function validateSubBlock(subBlock, inputText) {
+  const expectedText = ANSWERS[subBlock];
+  const normalizedInput = inputText.toUpperCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+  const normalizedExpected = expectedText.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+
+  if (normalizedInput === normalizedExpected) {
+    unlockSubBlock(subBlock, expectedText);
+    // Check if both parts of block 8 are complete
+    if (block8Progress["8a"] && block8Progress["8b"]) {
+      // Mark block 8 container as unlocked without overwriting sub-block text
+      const block = document.querySelector('[data-block="8"]');
+      block.classList.remove('locked');
+      block.classList.add('unlocked');
+      block.querySelector('.block-number').classList.add('unlocked');
+      unlockedBlocks++;
+      updateProgress();
+      if (unlockedBlocks === 8) setTimeout(showCompletion, 1000);
+    }
+  } else {
+    showError("Not quite right. Try again!");
+  }
+}
+
+function unlockSubBlock(subBlock, plaintext) {
+  const cipherSpan = document.querySelector(`[data-subblock="${subBlock}"].cipher-text`);
+  const input = document.querySelector(`[data-subblock="${subBlock}"].decode-input`);
+
+  // Update visual state
+  cipherSpan.classList.remove('locked');
+  cipherSpan.classList.add('unlocked');
+
+  // Hide input and show plaintext
+  input.style.display = 'none';
+
+  // Replace cipher text with plaintext
+  cipherSpan.textContent = plaintext;
+
+  // Mark this sub-block as complete
+  block8Progress[subBlock] = true;
+}
+
+function unlockBlock(blockNum, plaintext) {
+  const block = document.querySelector(`[data-block="${blockNum}"]`);
+  const cipherText = block.querySelector('.cipher-text');
+  const blockNumber = block.querySelector('.block-number');
+  const input = block.querySelector('.decode-input');
+
+  // Update visual state
+  block.classList.remove('locked');
+  block.classList.add('unlocked');
+  cipherText.classList.remove('locked');
+  cipherText.classList.add('unlocked');
+  blockNumber.classList.add('unlocked');
+
+  // Hide input and show plaintext
+  input.style.display = 'none';
+
+  // Replace cipher text with plaintext
+  cipherText.textContent = plaintext;
+
+  // Update progress
+  unlockedBlocks++;
+  updateProgress();
+
+  // Check if all blocks are unlocked
+  if (unlockedBlocks === 8) {
+    setTimeout(showCompletion, 1000);
+  }
+}
+
+function updateProgress() {
+  document.getElementById('progressText').textContent = `${unlockedBlocks}/8 blocks unlocked`;
+}
+
+function showError(message) {
+  const toast = document.getElementById('errorToast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2000);
+}
+
+const ENDING_SCENES = [
+  "Nåväl... Du klarade det, detektiv Roth. Varje chiffer knäckt, varje hemlighet avslöjad.",
+  "Mannen som kom in — Junhwi. Han frågade inte ens vad det kostar. Bara: 'Kan ni se till att hon får det?'",
+  "Det här är min personliga åsikt... men han såg lite ut som en potatis. Ändå gick det inte att ogilla honom.",
+  "Ärligt talat — först trodde jag att han gått vilse. Han pratade svenska, men jag förstod inte ett ord. Jag tänkte bara hjälpa till med tolkningen. Men när jag såg breven... förstod jag att det var du som måste lösa det här.",
+  "Han lade verkligen hela sitt hjärta i det här. En sådan här klient... det är första gången för mig. (kort tystnad) Du är verkligen en lycklig människa, detektiv Roth.",
+  "Fallet är avslutat. Brevet är ditt nu. Gå och läs det ordentligt.",
+];
+
+let endingIdx = 0;
+
+function showEnding() {
+  const overlay = document.getElementById('endingOverlay');
+  overlay.classList.add('show');
+  typeEndingScene();
+
+  const advance = (e) => {
+    if (e.type === 'keydown' || e.type === 'click') {
+      if (document.getElementById('endingBtnWrap').style.display !== 'none') return;
+      endingIdx++;
+      if (endingIdx < ENDING_SCENES.length) {
+        typeEndingScene();
+      } else {
+        document.getElementById('endingHint').style.display = 'none';
+        document.getElementById('endingBtnWrap').style.display = 'block';
+        document.removeEventListener('keydown', advance);
+        overlay.removeEventListener('click', advance);
+      }
+    }
+  };
+  document.addEventListener('keydown', advance);
+  overlay.addEventListener('click', advance);
+
+  document.getElementById('endingClose').addEventListener('click', () => {
+    overlay.classList.add('hidden');
+    setTimeout(() => { overlay.remove(); buildFullLetter(); }, 700);
+  });
+}
+
+function typeEndingScene() {
+  const textEl = document.getElementById('endingText');
+  const hint = document.getElementById('endingHint');
+  const text = ENDING_SCENES[endingIdx];
+  textEl.textContent = '';
+  hint.style.display = 'none';
+  let i = 0;
+  const interval = setInterval(() => {
+    textEl.textContent += text[i++];
+    if (i >= text.length) {
+      clearInterval(interval);
+      hint.style.display = '';
+    }
+  }, 28);
+}
+
+function showCompletion() {
+  const page = document.querySelector('.page');
+  page.classList.add('complete');
+
+  // Change watermark to CONFIDENTIAL
+  document.getElementById('pageWatermark').textContent = 'CONFIDENTIAL';
+
+  setTimeout(showEnding, 800);
+
+}
+
+function buildFullLetter() {
+  const page = document.querySelector('.page');
+
+  // Hide all block wrappers, dividers, progress, and instructions
+  document.querySelectorAll('.cipher-block, .divider').forEach(el => el.style.display = 'none');
+  document.querySelector('.progress').style.display = 'none';
+  document.querySelector('.instructions').style.display = 'none';
+
+  const fullLetter = document.createElement('div');
+  fullLetter.style.cssText = 'position:relative;z-index:1;animation:fadeInText 0.8s ease-out;';
+
+  const paragraphs = [
+    { text: ANSWERS[1], cls: 'greeting' },
+    { text: ANSWERS[2] },
+    { text: ANSWERS[3] },
+    { text: ANSWERS[4] },
+    { text: ANSWERS[5] },
+    { text: ANSWERS[6] },
+    { text: ANSWERS[7] },
+  ];
+
+  paragraphs.forEach(({ text, cls }) => {
+    const p = document.createElement('p');
+    p.textContent = text;
+    p.style.cssText = 'font-family:"Special Elite","Courier New",monospace;font-size:1rem;line-height:1.85;letter-spacing:1px;color:#000;margin:0 0 24px;';
+    if (cls === 'greeting') p.style.fontSize = '1.15rem';
+    fullLetter.appendChild(p);
+  });
+
+  const closing = document.createElement('div');
+  closing.style.cssText = 'margin-top:50px;text-align:right;font-family:"Special Elite","Courier New",monospace;font-size:1.05rem;letter-spacing:1.5px;color:#000;line-height:1.7;';
+  closing.innerHTML = `<div>${ANSWERS['8a']}</div><div style="font-size:1.15rem;letter-spacing:2px;margin-top:6px;">— ${ANSWERS['8b']}</div>`;
+  fullLetter.appendChild(closing);
+
+  const characters = document.createElement('div');
+  characters.style.cssText = 'display:flex;align-items:flex-end;justify-content:center;gap:40px;margin-top:60px;';
+  characters.innerHTML = `
+    <div style="display:flex;flex-direction:row;align-items:flex-end;gap:8px;">
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <img src="female_nobg.png" style="height:180px;width:auto;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.25));" />
+        <div style="font-family:'Special Elite',monospace;font-size:0.75rem;letter-spacing:2px;color:#2b1d10;margin-top:6px;">SIRI ROTH</div>
+        <div style="font-size:0.65rem;letter-spacing:2px;color:#8b7355;">DETEKTIV</div>
+      </div>
+      <div style="display:flex;flex-direction:row;align-items:center;margin-bottom:40px;gap:4px;">
+        <div style="font-size:1.4rem;color:#8b7355;">→</div>
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="font-size:0.7rem;color:#8b1a1a;font-family:'Special Elite',monospace;letter-spacing:1px;margin-bottom:4px;">actually sweet potato..</div>
+          <img src="siri_nobg.png" style="height:120px;width:auto;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.25));" />
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <img src="detective_nobg.png" style="height:200px;width:auto;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.25));" />
+      <div style="font-family:'Special Elite',monospace;font-size:0.75rem;letter-spacing:2px;color:#2b1d10;margin-top:6px;">MAGNUS HOLM</div>
+      <div style="font-size:0.65rem;letter-spacing:2px;color:#8b7355;">KOLLEGA</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div style="font-size:0.7rem;color:#8b1a1a;font-family:'Special Elite',monospace;letter-spacing:1px;margin-bottom:4px;">actually potato..</div>
+      <img src="junhwi_nobg.png" style="height:160px;width:auto;filter:drop-shadow(0 8px 16px rgba(0,0,0,0.25));" />
+      <div style="font-family:'Special Elite',monospace;font-size:0.75rem;letter-spacing:2px;color:#2b1d10;margin-top:6px;">JUNHWI</div>
+      <div style="font-size:0.65rem;letter-spacing:2px;color:#8b7355;">KLIENT</div>
+    </div>
+  `;
+  fullLetter.appendChild(characters);
+
+  const footer = document.createElement('div');
+  footer.style.cssText = 'margin-top:30px;text-align:center;font-family:"Special Elite","Courier New",monospace;font-size:0.7rem;letter-spacing:2px;color:#8b7355;opacity:0.7;';
+  footer.textContent = '2026.04.26  ·  created with love by junhwi';
+  fullLetter.appendChild(footer);
+
+  page.appendChild(fullLetter);
+}
+</script>
+
+</body>
+</html>
