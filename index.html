@@ -1406,6 +1406,7 @@
       if (started) return;
       started = true;
       audio.volume = 0;
+      var muteBtn = document.getElementById('muteToggle');
       audio.play().then(function() {
         var v = 0, target = 0.35;
         var fade = setInterval(function() {
@@ -1413,7 +1414,10 @@
           audio.volume = v;
           if (v >= target) clearInterval(fade);
         }, 100);
-      }).catch(function() {});
+        if (muteBtn) muteBtn.style.display = 'flex';
+      }).catch(function() {
+        if (muteBtn) { muteBtn.style.display = 'flex'; muteBtn.classList.add('muted'); }
+      });
       document.removeEventListener('click', tryStart);
       document.removeEventListener('keydown', tryStart);
     }
